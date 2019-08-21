@@ -50,7 +50,10 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
     }
     @Bean
     public TopicExchange topicExchange(){
-        return new TopicExchange(Const.TOPIC_CHANGE);
+        /**
+         * 可以直接通过ExchangeBuilder来构建交换机
+         */
+        return (TopicExchange) ExchangeBuilder.topicExchange(Const.TOPIC_CHANGE).durable(true).build();
     }
     @Bean
     public Binding topicBindOne(){
@@ -89,10 +92,14 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
     /**
      * 直连模式
      * 与主题模式相似，不过只支持完全匹配
+     * 通过QueueBuilder构建持久化队列
      */
     @Bean
     public Queue directQueueOne(){
-        return new Queue(Const.DIRECT_QUEUE_ONE);
+        /**
+         * 可以直接通过QueueBuilder来构建队列
+         */
+        return QueueBuilder.durable(Const.DIRECT_QUEUE_ONE).build();
     }
     @Bean
     public Queue directQueueTwo(){
@@ -112,34 +119,11 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
     }
 
     /**
-     * 定制化amqp模版
-     *
-     * ConfirmCallback接口用于实现消息发送到RabbitMQ交换器后接收ack回调   即消息发送到exchange  ack
-     * ReturnCallback接口用于实现消息发送到RabbitMQ 交换器，但无相应队列与交换器绑定时的回调  即消息发送不到任何一个队列中  ack
+     * 确认消息是否已推送到交换机
+     * @param correlationData
+     * @param ack
+     * @param cause
      */
-    /*@Bean
-    public RabbitTemplate rabbitTemplate(){
-        rabbitTemplate.setMandatory(true);
-
-        // 消息返回，需要配置publisher-returns: true
-        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routeKey) -> {
-            // 发送的消息
-            String correlationId = message.getMessageProperties().getCorrelationId();
-            log.error("消息：{}发送失败，应答码：{}，原因：{}，交换机：{}，路由键：{}", new Object[]{correlationId, replyCode, replyText, exchange, routeKey});
-        });
-
-        // 消息确认，需要配置publisher-confirms: true
-        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
-            if (ack){
-                log.info("消息发送到交换机成功,id:{}", new Object[]{correlationData.getId()});
-            } else {
-                log.error("消息发送到交换机失败，原因:{}", cause);
-            }
-        });
-
-        return rabbitTemplate;
-    }*/
-
     @Override
     public void confirm(CorrelationData correlationData, boolean ack, String cause) {
         if (ack){
@@ -149,9 +133,16 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
         }
     }
 
+    /**
+     * 确认消息是否已推送到队列
+     * @param message
+     * @param replyCode
+     * @param replyText
+     * @param exchange
+     * @param routingKey
+     */
     @Override
     public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
-        // 反序列化对象输出
         log.info("消息主题:{}", new String(message.getBody()));
         log.info("应答码:{}", replyCode);
         log.info("描述{}", replyText);

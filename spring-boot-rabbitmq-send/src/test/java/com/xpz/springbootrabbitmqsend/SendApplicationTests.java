@@ -23,8 +23,10 @@ public class SendApplicationTests {
 
     @Test
     public void sendTopicMsg(){
-        String str = "Hello,This is Topic message.";
-        sendMsg.sendMsg(str);
+        for(int i=0;i<10;i++) {
+            String str = "Hello,This is Topic message.";
+            sendMsg.sendMsg(str);
+        }
     }
 
     @Test

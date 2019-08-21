@@ -3,9 +3,12 @@ package com.xpz.springbootrabbitmqsend.send;
 import com.xpz.common.Const;
 import com.xpz.entity.User;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 @Component
 public class SendMsg {
@@ -26,6 +29,10 @@ public class SendMsg {
      * @param str
      */
     public void sendMsg(String str){
-        amqpTemplate.convertAndSend(Const.TOPIC_CHANGE, "topic.one.message", str);
+        /**
+         * 定义DTO，用来传递数据
+         */
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+        amqpTemplate.convertAndSend(Const.TOPIC_CHANGE, "topic.one.message", str, correlationData);
     }
 }
