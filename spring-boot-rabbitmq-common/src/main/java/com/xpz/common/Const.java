@@ -19,4 +19,7 @@ public class Const {
     public static final String DIRECT_QUEUE_TWO = "direct.queue.two";
     // 直连交换机
     public static final String DIRECT_CHANGE = "direct.exchange";
+    // 直连路由键
+    public static final String DIRECT_ROUTE_KEY_ONE = "direct.route.key.one";
+    public static final String DIRECT_ROUTE_KEY_TWO = "direct.route.key.two";
 }

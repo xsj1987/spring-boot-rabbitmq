@@ -1,0 +1,28 @@
+server:
+  port: 8011
+
+spring:
+  application:
+    name: spring-boot-rabbitmq
+  rabbitmq:
+    host: 192.168.0.131
+    port: 5672
+    username: guest
+    password: guest
+    # 消息推送到路由回调 P->Exchange
+    publisher-confirms: true
+    # 消息推送到队列回调 Exchange->Queue
+    publisher-returns: true
+    listener:
+      simple:
+        # 设置手动确认 Queue->C
+        acknowledge-mode: manual
+        # 最大消息容量
+        prefetch: 100
+        # 指定最小的消费者数量
+        concurrency: 1
+        # 指定最大的消费者数量
+        max-concurrency: 1
+        retry:
+          # 是否支持重试
+          enabled: true

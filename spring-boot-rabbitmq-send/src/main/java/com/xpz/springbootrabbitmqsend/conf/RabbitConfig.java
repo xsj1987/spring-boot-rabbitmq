@@ -1,120 +1,46 @@
 package com.xpz.springbootrabbitmqsend.conf;
 
-import com.xpz.common.Const;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 @Component
 @Configuration
 @Slf4j
-public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTemplate.ReturnCallback {
+public class RabbitConfig {
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private CachingConnectionFactory connectionFactory;
 
-    @PostConstruct
-    public void init() {
-        rabbitTemplate.setConfirmCallback(this);
-        rabbitTemplate.setReturnCallback(this);
-    }
-
-    /**
-     * 主题模式，适用于发布/订阅模式
-     * 采用模糊匹配
-     *      * 匹配一个单词
-     *      # 匹配0个或者多个单词
-     */
     @Bean
-    public Queue topicQueueOne(){
-        /**
-         * Queue有四个参数
-         *      1.name-队列名
-         *      2.durable-持久化消息队列，默认为true，表示rabbit重启的时候不需要创建新的队列
-         *      3.auto-delete-表示消息队列没有在使用时将被自动删除，默认为false
-         *      4.exclusive-表示该消息队列是否只在当前connection生效，默认为false
-         */
-        return new Queue(Const.TOPIC_QUEUE_ONE);
-    }
-    @Bean
-    public Queue topicQueueTwo(){
-        return new Queue(Const.TOPIC_QUEUE_TWO);
-    }
-    @Bean
-    public TopicExchange topicExchange(){
-        /**
-         * 可以直接通过ExchangeBuilder来构建交换机
-         */
-        return (TopicExchange) ExchangeBuilder.topicExchange(Const.TOPIC_CHANGE).durable(true).build();
-    }
-    @Bean
-    public Binding topicBindOne(){
-        return BindingBuilder.bind(topicQueueOne()).to(topicExchange()).with("topic.one.message");
-    }
-    @Bean
-    public Binding topicBindTwo(){
-        return BindingBuilder.bind(topicQueueTwo()).to(topicExchange()).with("topic.two.message");
+    public RabbitTemplate rabbitTemplate(){
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(converter());
+        // 消息是否成功发送到Exchange
+        rabbitTemplate.setConfirmCallback(((correlationData, ack, cause) -> {
+            if (ack){
+                String msgId = correlationData.getId();
+                log.info("消息{}成功发送到Exchange", msgId);
+            } else {
+                log.error("消息发送到Exchange失败,{},cause:{}", correlationData, cause);
+            }
+        }));
+        // 触发setReturnCallback回调必须设置mandatory=true, 否则Exchange没有找到Queue就会丢弃掉消息, 而不会触发回调
+        rabbitTemplate.setMandatory(true);
+        // 消息是否从Exchange路由到Queue, 注意: 这是一个失败回调, 只有消息从Exchange路由到Queue失败才会回调这个方法
+        rabbitTemplate.setReturnCallback(((message, replyCode, replyText, exchange, routingKey) -> {
+            log.error("消息从Exchange路由到Queue失败,Exchange:{},route:{},route:{},replyCode:{},replyText:{},message:{}", exchange, routingKey, replyCode, replyText, message);
+        }));
+        return rabbitTemplate;
     }
 
-    /**
-     * 扇形模式
-     * Fanout交换机发送消息，绑定了这个交换机的所有队列都收到这个消息
-     */
-    @Bean
-    public Queue fanoutQueueOne(){
-        return new Queue(Const.FANOUT_QUEUE_ONE);
-    }
-    @Bean
-    public Queue fanoutQueueTwo(){
-        return new Queue(Const.FANOUT_QUEUE_TWO);
-    }
-    @Bean
-    public FanoutExchange fanoutExchange(){
-        return new FanoutExchange(Const.FANOUT_CHANGE);
-    }
-    @Bean
-    public Binding fanoutBindOne(){
-        return BindingBuilder.bind(fanoutQueueOne()).to(fanoutExchange());
-    }
-    @Bean
-    public Binding fanoutBindTwo(){
-        return BindingBuilder.bind(fanoutQueueTwo()).to(fanoutExchange());
-    }
-
-    /**
-     * 直连模式
-     * 与主题模式相似，不过只支持完全匹配
-     * 通过QueueBuilder构建持久化队列
-     */
-    @Bean
-    public Queue directQueueOne(){
-        /**
-         * 可以直接通过QueueBuilder来构建队列
-         */
-        return QueueBuilder.durable(Const.DIRECT_QUEUE_ONE).build();
-    }
-    @Bean
-    public Queue directQueueTwo(){
-        return new Queue(Const.DIRECT_QUEUE_TWO);
-    }
-    @Bean
-    public DirectExchange directExchange(){
-        return new DirectExchange(Const.DIRECT_CHANGE);
-    }
-    @Bean
-    public Binding directBindOne(){
-        return BindingBuilder.bind(directQueueOne()).to(directExchange()).with("direct.one.msg");
-    }
-    @Bean
-    public Binding directBindTwo(){
-        return BindingBuilder.bind(directQueueTwo()).to(directExchange()).with("direct.two.msg");
+    public Jackson2JsonMessageConverter converter(){
+        return new Jackson2JsonMessageConverter();
     }
 
     /**
@@ -123,14 +49,14 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
      * @param ack
      * @param cause
      */
-    @Override
+    /*@Override
     public void confirm(CorrelationData correlationData, boolean ack, String cause) {
         if (ack){
             log.info("消息发送成功:{}", correlationData);
         } else {
             log.info("消息发送失败:{}", cause);
         }
-    }
+    }*/
 
     /**
      * 确认消息是否已推送到队列
@@ -140,12 +66,12 @@ public class RabbitConfig implements RabbitTemplate.ConfirmCallback, RabbitTempl
      * @param exchange
      * @param routingKey
      */
-    @Override
+    /*@Override
     public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
         log.info("消息主题:{}", new String(message.getBody()));
         log.info("应答码:{}", replyCode);
         log.info("描述{}", replyText);
         log.info("消息使用的交换器 exchange:{}", exchange);
         log.info("消息使用的路由键 routing:{}", routingKey);
-    }
+    }*/
 }

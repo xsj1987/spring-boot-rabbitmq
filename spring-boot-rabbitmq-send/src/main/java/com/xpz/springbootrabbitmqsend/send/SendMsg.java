@@ -2,7 +2,6 @@ package com.xpz.springbootrabbitmqsend.send;
 
 import com.xpz.common.Const;
 import com.xpz.entity.User;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +32,6 @@ public class SendMsg {
          * 定义DTO，用来传递数据
          */
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
-        amqpTemplate.convertAndSend(Const.TOPIC_CHANGE, "topic.one.message", str, correlationData);
+        amqpTemplate.convertAndSend(Const.DIRECT_CHANGE, "direct.one.msg", );
     }
 }
