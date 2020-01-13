@@ -13,9 +13,13 @@ spring:
     publisher-confirms: true
     # 消息推送到队列回调 Exchange->Queue
     publisher-returns: true
+    # 指定心跳超时 默认为60s
+    #requested-heartbeat: 30
+    # 连接超时 单位:毫秒
+    #connection-timeout: 0
     listener:
       simple:
-        # 设置手动确认 Queue->C
+        # 设置手动确认 Queue->C [在客户端使用]
         acknowledge-mode: manual
         # 最大消息容量
         prefetch: 100

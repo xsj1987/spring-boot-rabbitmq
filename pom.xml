@@ -17,13 +17,14 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <jackson.version>2.9.8</jackson.version>
     </properties>
 
 
     <modules>
         <module>spring-boot-rabbitmq-send</module>
-        <module>spring-boot-rabbitmq-receive</module>
         <module>spring-boot-rabbitmq-common</module>
+        <module>spring-boot-rabbitmq-consumer</module>
     </modules>
 
     <dependencyManagement>
@@ -33,16 +34,34 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.4</version>
             </dependency>
+            <!-- Jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>

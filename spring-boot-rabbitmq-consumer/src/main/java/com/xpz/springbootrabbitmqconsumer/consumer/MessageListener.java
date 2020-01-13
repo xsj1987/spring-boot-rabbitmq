@@ -2,7 +2,7 @@ package com.xpz.springbootrabbitmqconsumer.consumer;
 
 import com.rabbitmq.client.Channel;
 import com.xpz.common.Const;
-import com.xpz.entity.User;
+import com.xpz.common.MessageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -28,7 +28,7 @@ public class MessageListener {
      * @param channel
      */
     //@RabbitListener(queues = Const.TOPIC_QUEUE_ONE)
-    @RabbitListener(queuesToDeclare=@Queue(Const.TOPIC_QUEUE_ONE))
+    /*@RabbitListener(queuesToDeclare=@Queue(Const.TOPIC_QUEUE_ONE))
     public void messageListener(Message msg, Channel channel){
         try {
             // 设置prefech_count=1,这样RabbitMQ就会使得每个Consumer在同一个时间点最多处理一个Message
@@ -40,15 +40,106 @@ public class MessageListener {
             log.error("队列{}消息接收失败,消息内容:{}", Const.TOPIC_QUEUE_ONE, new String(msg.getBody()));
             e.printStackTrace();
         }
-    }
+    }*/
 
-    @RabbitListener(queues = Const.TOPIC_QUEUE_ONE)
-    public void messageListener(String msg){
+    @RabbitListener(queuesToDeclare = @Queue(Const.TOPIC_QUEUE_ONE))
+    public void topicListenerOne(String msg){
         log.info("监听队列:{},收到的消息为:{}", Const.TOPIC_QUEUE_ONE , msg);
     }
 
-    @RabbitListener(queues = Const.TOPIC_QUEUE_TWO)
-    public void ObjectListener(User user){
-        log.info("监听队列:{},收到的消息为:{}", Const.TOPIC_QUEUE_TWO , user);
+    @RabbitListener(queuesToDeclare = @Queue(Const.TOPIC_QUEUE_TWO))
+    public void topicListenerTwo(Message message, Channel channel){
+        try{
+            String msg = MessageHelper.msgToObj(message, String.class);
+            long tag = message.getMessageProperties().getDeliveryTag();
+            log.info("监听队列:{},收到的消息为:{}, tag:{}", Const.TOPIC_QUEUE_TWO, msg, tag);
+            channel.basicAck(tag, true);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @RabbitListener(queuesToDeclare = @Queue(Const.TOPIC_QUEUE_THREE))
+    public void topicListenerThree(Message message, Channel channel){
+        try{
+            String msg = MessageHelper.msgToObj(message, String.class);
+            long tag = message.getMessageProperties().getDeliveryTag();
+            log.info("监听队列:{},收到的消息为:{}, tag:{}", Const.TOPIC_QUEUE_THREE, msg, tag);
+            channel.basicAck(tag, true);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @RabbitListener(queuesToDeclare = @Queue(Const.TOPIC_QUEUE_FOUR))
+    public void topicListenerFour(Message message, Channel channel){
+        try{
+            String msg = MessageHelper.msgToObj(message, String.class);
+            long tag = message.getMessageProperties().getDeliveryTag();
+            log.info("监听队列:{},收到的消息为:{}, tag:{}", Const.TOPIC_QUEUE_FOUR, msg, tag);
+            channel.basicAck(tag, true);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 监听直连消息1
+     * @param message
+     * @param channel
+     */
+    @RabbitListener(queuesToDeclare = @Queue(Const.DIRECT_QUEUE_ONE))
+    public void consumer(Message message, Channel channel) throws IOException {
+        String msg = MessageHelper.msgToObj(message, String.class);
+        long tag = message.getMessageProperties().getDeliveryTag();
+        log.info("监听队列：{},接收到消息：msg:{}, tag:{}", Const.DIRECT_QUEUE_ONE, msg, tag);
+        channel.basicAck(tag, false);
+    }
+
+    /**
+     * 监听直连消息2
+     * @param message
+     * @param channel
+     */
+    @RabbitListener(queuesToDeclare = @Queue(Const.DIRECT_QUEUE_TWO))
+    public void consumer2(Message message, Channel channel) throws IOException {
+        String msg = MessageHelper.msgToObj(message, String.class);
+        long tag = message.getMessageProperties().getDeliveryTag();
+        log.info("监听队列：{},接收到消息：msg:{}, tag:{}", Const.DIRECT_QUEUE_TWO, msg, tag);
+        channel.basicAck(tag, false);
+    }
+
+    /**
+     * 监听扇形队列消息1
+     * @param message
+     * @param channel
+     */
+    @RabbitListener(queuesToDeclare = @Queue(Const.FANOUT_QUEUE_ONE))
+    public void fanoutListener(Message message, Channel channel){
+        try{
+            String msg = MessageHelper.msgToObj(message, String.class);
+            long tag = message.getMessageProperties().getDeliveryTag();
+            log.info("监听队列：{},接收到消息：msg:{}, tag:{}", Const.FANOUT_QUEUE_ONE, msg, tag);
+            channel.basicAck(tag, true);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 监听扇形队列消息2
+     * @param message
+     * @param channel
+     */
+    @RabbitListener(queuesToDeclare = @Queue(Const.FANOUT_QUEUE_TWO))
+    public void fanoutListener2(Message message, Channel channel){
+        try{
+            String msg = MessageHelper.msgToObj(message, String.class);
+            long tag = message.getMessageProperties().getDeliveryTag();
+            log.info("监听队列：{},接收到消息：msg:{}, tag:{}", Const.FANOUT_QUEUE_TWO, msg, tag);
+            channel.basicAck(tag, true);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

@@ -32,6 +32,18 @@ public class SendMsg {
          * 定义DTO，用来传递数据
          */
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
-        amqpTemplate.convertAndSend(Const.DIRECT_CHANGE, "direct.one.msg", );
+        amqpTemplate.convertAndSend(Const.DIRECT_CHANGE, Const.DIRECT_ROUTE_KEY_ONE, str, correlationData);
+    }
+
+    /**
+     * 推送字符串主题消息
+     * @param str
+     */
+    public void sendMsg(String str, String exchange, String routeKey){
+        /**
+         * 定义DTO，用来传递数据
+         */
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+        amqpTemplate.convertAndSend(exchange, routeKey, str, correlationData);
     }
 }

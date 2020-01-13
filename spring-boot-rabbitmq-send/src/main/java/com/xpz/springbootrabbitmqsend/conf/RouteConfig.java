@@ -30,16 +30,32 @@ public class RouteConfig {
         return new Queue(Const.TOPIC_QUEUE_TWO);
     }
     @Bean
+    public Queue topicQueueThree(){
+        return new Queue(Const.TOPIC_QUEUE_THREE);
+    }
+    @Bean
+    public Queue topicQueueFour(){
+        return new Queue(Const.TOPIC_QUEUE_FOUR);
+    }
+    @Bean
     public TopicExchange topicExchange(){
         return new TopicExchange(Const.TOPIC_CHANGE);
     }
     @Bean
     public Binding topicBindOne(){
-        return BindingBuilder.bind(topicQueueOne()).to(topicExchange()).with("topic.one.message");
+        return BindingBuilder.bind(topicQueueOne()).to(topicExchange()).with(Const.TOPIC_ROUTE_KEY_ONE);
     }
     @Bean
     public Binding topicBindTwo(){
-        return BindingBuilder.bind(topicQueueTwo()).to(topicExchange()).with("topic.two.message");
+        return BindingBuilder.bind(topicQueueTwo()).to(topicExchange()).with(Const.TOPIC_ROUTE_KEY_TWO);
+    }
+    @Bean
+    public Binding topicBindThree(){
+        return BindingBuilder.bind(topicQueueThree()).to(topicExchange()).with(Const.TOPIC_ROUTE_KEY_ONE);
+    }
+    @Bean
+    public Binding topicBindFour(){
+        return BindingBuilder.bind(topicQueueFour()).to(topicExchange()).with(Const.TOPIC_ROUTE_KEY_TWO);
     }
 
     /**
@@ -85,10 +101,10 @@ public class RouteConfig {
     }
     @Bean
     public Binding directBindOne(){
-        return BindingBuilder.bind(directQueueOne()).to(directExchange()).with("direct.one.msg");
+        return BindingBuilder.bind(directQueueOne()).to(directExchange()).with(Const.DIRECT_ROUTE_KEY_ONE);
     }
     @Bean
     public Binding directBindTwo(){
-        return BindingBuilder.bind(directQueueTwo()).to(directExchange()).with("direct.two.msg");
+        return BindingBuilder.bind(directQueueTwo()).to(directExchange()).with(Const.DIRECT_ROUTE_KEY_TWO);
     }
 }

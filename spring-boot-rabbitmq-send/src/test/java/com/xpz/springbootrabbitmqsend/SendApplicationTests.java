@@ -1,5 +1,6 @@
 package com.xpz.springbootrabbitmqsend;
 
+import com.xpz.common.Const;
 import com.xpz.entity.User;
 import com.xpz.springbootrabbitmqsend.send.SendMsg;
 import org.junit.Test;
@@ -22,19 +23,34 @@ public class SendApplicationTests {
     }
 
     @Test
-    public void sendTopicMsg(){
-        /*for(int i=0;i<10;i++) {
-            String str = "Hello,This is Topic message.";
+    public void sendDirectMsg(){
+        for(int i=0;i<10;i++) {
+            String str = "Hello,This is Topic message." + i;
             sendMsg.sendMsg(str);
-        }*/
-        /*String str = "{\"away\":3,\"event\":1,\"home\":1,\"id\":1215352,\"time\":\"42\",\"type\":1}";
-        sendMsg.sendMsg(str);*/
+        }
     }
 
     @Test
     public void sendTopicUser(){
         User user = new User(1, "admin", new Date());
         sendMsg.sendMsg(user);
+    }
+
+    @Test
+    public void sendTopicMsg(){
+        String routeKey = "topic.route.key.two";
+        for(int i=0;i<10;i++) {
+            String str = "Hello,This is Topic message." + i;
+            sendMsg.sendMsg(str, Const.TOPIC_CHANGE, routeKey);
+        }
+    }
+
+    @Test
+    public void sendFanoutMsg(){
+        for(int i=0;i<10;i++) {
+            String str = "Hello,This is Fanout message." + i;
+            sendMsg.sendMsg(str, Const.FANOUT_CHANGE, "");
+        }
     }
 
 }

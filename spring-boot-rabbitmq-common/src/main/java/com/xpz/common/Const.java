@@ -5,8 +5,13 @@ public class Const {
     // 主题队列
     public static final String TOPIC_QUEUE_ONE = "topic.queue.one";
     public static final String TOPIC_QUEUE_TWO = "topic.queue.two";
+    public static final String TOPIC_QUEUE_THREE = "topic.queue.three";
+    public static final String TOPIC_QUEUE_FOUR = "topic.queue.four";
     // 主题交换机
     public static final String TOPIC_CHANGE = "topic.exchange";
+    // 主题路由键
+    public static final String TOPIC_ROUTE_KEY_ONE = "topic.route.key.one.*";
+    public static final String TOPIC_ROUTE_KEY_TWO = "topic.route.key.two.#";
 
     // 扇形队列
     public static final String FANOUT_QUEUE_ONE = "fanout.queue.one";
