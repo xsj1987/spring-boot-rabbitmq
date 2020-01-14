@@ -27,4 +27,11 @@ public class Const {
     // 直连路由键
     public static final String DIRECT_ROUTE_KEY_ONE = "direct.route.key.one";
     public static final String DIRECT_ROUTE_KEY_TWO = "direct.route.key.two";
+
+    // 死信交换机
+    public static final String DLX_EXCHANGE = "dlx.exchange";
+    // 死信队列
+    public static final String DLX_QUEUE = "dlx.queue";
+    // 死信路由
+    public static final String DLX_ROUTE_KEY = "dlx.route.key";
 }

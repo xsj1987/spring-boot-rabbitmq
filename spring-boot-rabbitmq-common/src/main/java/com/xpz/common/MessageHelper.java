@@ -9,10 +9,11 @@ public class MessageHelper {
 
     /**
      * 序列化消息
-     * @param obj
+     * @param obj 序列化对象
+     * @param expiration 延迟时间
      * @return
      */
-    public static Message objToMsg(Object obj){
+    public static Message objToMsg(Object obj, String expiration){
         if (obj == null){
             return null;
         }
@@ -20,6 +21,7 @@ public class MessageHelper {
         message.getMessageProperties().setDeliveryMode(MessageDeliveryMode.PERSISTENT);
         // 设置消息内容格式
         message.getMessageProperties().setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        message.getMessageProperties().setExpiration(expiration);
         return message;
     }
 

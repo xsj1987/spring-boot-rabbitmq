@@ -65,7 +65,7 @@ public class MessageListener {
             String msg = MessageHelper.msgToObj(message, String.class);
             long tag = message.getMessageProperties().getDeliveryTag();
             log.info("监听队列:{},收到的消息为:{}, tag:{}", Const.TOPIC_QUEUE_THREE, msg, tag);
-            channel.basicAck(tag, true);
+            channel.basicReject(tag, false);
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -141,5 +141,16 @@ public class MessageListener {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 监听死信队列
+     * @param message
+     * @param channel
+     */
+    @RabbitListener(queuesToDeclare = @Queue(Const.DLX_QUEUE))
+    public void dlxListener(Message message, Channel channel) {
+        String msg = MessageHelper.msgToObj(message, String.class);
+        log.info("监听死信队列：{}, msg:{}", Const.DLX_QUEUE, msg);
     }
 }

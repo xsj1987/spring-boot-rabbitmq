@@ -5,6 +5,9 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RouteConfig {
 
@@ -23,7 +26,16 @@ public class RouteConfig {
          *      3.auto-delete-表示消息队列没有在使用时将被自动删除，默认为false
          *      4.exclusive-表示该消息队列是否只在当前connection生效，默认为false
          */
-        return new Queue(Const.TOPIC_QUEUE_ONE);
+        /**
+         * 设置队列消息的过期时间[x-message-ttl],单位：毫秒
+         * 设置队列的过期时间[x-expires],单位：毫秒
+         * 注：RabbitMQ只对处于队头的消息判断是否过期(即不会扫描队列),所以,很可能队列中已存在死消息，但是队列并不知情。
+         *    这会影响队列统计数据的正确性，妨碍队列及时释放资源。
+         */
+        Map<String, Object> params = new HashMap<>();
+        params.put("x-message-ttl", 1000);
+        //params.put("x-expires", 5000);
+        return new Queue(Const.TOPIC_QUEUE_ONE, true, false, false, params);
     }
     @Bean
     public Queue topicQueueTwo(){
@@ -31,7 +43,19 @@ public class RouteConfig {
     }
     @Bean
     public Queue topicQueueThree(){
-        return new Queue(Const.TOPIC_QUEUE_THREE);
+        /**
+         * 创建死信队列，在如下三种情况下，消息会被推送到死信队列
+         *  * 消息被拒绝(basic.reject / basic.nack)，并且requeue = false
+         *  * 消息TTL过期
+         *  * 队列达到最大长度
+         */
+        Map<String, Object> params = new HashMap<>();
+        params.put("x-message-ttl", 3000);
+        // 声明当前队列绑定的死信交换机
+        params.put("x-dead-letter-exchange", Const.DLX_EXCHANGE);
+        // 声明当前队列的死信路由
+        params.put("x-dead-letter-routing-key", Const.DLX_ROUTE_KEY);
+        return new Queue(Const.TOPIC_QUEUE_THREE, true, false, false, params);
     }
     @Bean
     public Queue topicQueueFour(){
@@ -107,4 +131,21 @@ public class RouteConfig {
     public Binding directBindTwo(){
         return BindingBuilder.bind(directQueueTwo()).to(directExchange()).with(Const.DIRECT_ROUTE_KEY_TWO);
     }
+
+    /**
+     * 死信队列
+     */
+    @Bean
+    public DirectExchange dlxExchange(){
+        return new DirectExchange(Const.DLX_EXCHANGE);
+    }
+    @Bean
+    public Queue dlxQueue(){
+        return new Queue(Const.DLX_QUEUE);
+    }
+    @Bean
+    public Binding dlxBind(){
+        return BindingBuilder.bind(dlxQueue()).to(dlxExchange()).with(Const.DLX_ROUTE_KEY);
+    }
+
 }

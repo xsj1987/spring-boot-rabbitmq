@@ -38,7 +38,7 @@ public class SendApplicationTests {
 
     @Test
     public void sendTopicMsg(){
-        String routeKey = "topic.route.key.two";
+        String routeKey = "topic.route.key.one.abc";
         for(int i=0;i<10;i++) {
             String str = "Hello,This is Topic message." + i;
             sendMsg.sendMsg(str, Const.TOPIC_CHANGE, routeKey);

@@ -41,9 +41,21 @@ public class SendMsg {
      */
     public void sendMsg(String str, String exchange, String routeKey){
         /**
-         * 定义DTO，用来传递数据
+         * 给消息设置延迟毫秒值
          */
+        //String expiration = "1000";
+        //Message message = MessageHelper.objToMsg(str, expiration);
         CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
         amqpTemplate.convertAndSend(exchange, routeKey, str, correlationData);
+        /**
+         * 第二种方式设置延迟毫秒值
+         */
+        /*amqpTemplate.convertAndSend(exchange, routeKey, str, new MessagePostProcessor() {
+            @Override
+            public Message postProcessMessage(Message message) throws AmqpException {
+                message.getMessageProperties().setExpiration("2000");
+                return message;
+            }
+        }, correlationData);*/
     }
 }
